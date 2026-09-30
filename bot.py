@@ -15,6 +15,9 @@ load_dotenv()
 
 bot_token = os.getenv("BOT_TOKEN")
 admin_id = int(os.getenv("ADMIN_ID"))
+user_id = int(os.getenv("USER_ID"))
+
+ALLOWED_IDS = {admin_id, user_id}
 
 # Отправляем уведомление администратору
 
@@ -43,6 +46,10 @@ with open("menu.json", "r", encoding="utf-8") as file:
 
 # Главное меню
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id not in ALLOWED_IDS:
+        await update.message.reply_text("⛔️ Доступ запрещён.")
+        return
+
     keyboard = [
         ["☕️ Кофе с вкусняшками"],
         ["🍽️ Принести покушать"],
@@ -90,6 +97,10 @@ async def show_food_menu(update: Update):
 # Обработка сообщений
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
+        return
+
+    if update.effective_user.id not in ALLOWED_IDS:
+        await update.message.reply_text("⛔️ Доступ запрещён.")
         return
 
     text = update.message.text
